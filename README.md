@@ -30,3 +30,11 @@ Or:
 ```shell script
 ./gradlew build -D"quarkus.native.enabled"=false -D"quarkus.native.container-build"=true
 ```
+
+
+# Generate RSA Keys
+
+```shell script
+openssl genrsa -out privateKey.pem 2048
+openssl rsa -in privateKey.pem -pubout -out publicKey.pem
+```
