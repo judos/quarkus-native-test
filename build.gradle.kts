@@ -29,6 +29,8 @@ dependencies {
 	// db
 	implementation("io.quarkus:quarkus-jdbc-mysql")
 	implementation("io.quarkus:quarkus-hibernate-orm")
+	// json
+	implementation("io.quarkus:quarkus-rest-jsonb")
 }
 
 group = "ch.judos"
