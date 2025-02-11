@@ -1,4 +1,4 @@
-package ch.judos
+package ch.judos.auth
 
 import io.smallrye.jwt.build.Jwt
 import org.eclipse.microprofile.jwt.Claims

@@ -1,4 +1,4 @@
-package ch.judos
+package ch.judos.endpoints
 
 import jakarta.annotation.security.DenyAll
 import jakarta.annotation.security.PermitAll

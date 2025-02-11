@@ -26,6 +26,9 @@ dependencies {
 	testImplementation("io.rest-assured:rest-assured")
 	// jwt
 	implementation("io.quarkus:quarkus-smallrye-jwt")
+	// db
+	implementation("io.quarkus:quarkus-jdbc-mysql")
+	implementation("io.quarkus:quarkus-hibernate-orm")
 }
 
 group = "ch.judos"
