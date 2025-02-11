@@ -58,6 +58,6 @@ class TokenizerTests {
 	
 	fun getNextToken(str: String): TokenType? {
 		val (token, _) = Tokenizer.getNextToken(str, 0) ?: (null to 0)
-		return token
+		return token?.type
 	}
 }

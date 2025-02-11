@@ -7,6 +7,7 @@ enum class TokenType {
 	Boolean, // true, false
 	AdditiveOperator, // +, -
 	MultiplicativeOperator, // *, /, %
+	Potency, // ^
 	Comma,      // ,
 	Assign,     // =
 	RB, // right bracket
