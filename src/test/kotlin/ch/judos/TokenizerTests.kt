@@ -23,12 +23,12 @@ class TokenizerTests {
 		assertEquals(null, getNextToken("//"))
 		assertEquals(null, getNextToken(""" // test
 			"""))
-		assertEquals(TokenType.Boolean, getNextToken("\nfalse"))
-		assertEquals(TokenType.Boolean, getNextToken("/* ignor * 3 */false"))
+		assertEquals(Boolean, getNextToken("\nfalse"))
+		assertEquals(Boolean, getNextToken("/* ignor * 3 */false"))
 		assertEquals(Number, getNextToken("1 + 2"))
 		assertEquals(null, getNextToken("/* test comment * asdf */"))
 		assertEquals(Number, getNextToken("/* //wtf */1"))
-		assertEquals(TokenType.Boolean, getNextToken("""
+		assertEquals(Boolean, getNextToken("""
 			// 1 //wtf */ "nice"
 			true
 		""".trimIndent()))
@@ -38,34 +38,34 @@ class TokenizerTests {
 	fun testCorrectNextType() {
 		assertEquals(null, getNextToken(""))
 		assertEquals(null, getNextToken(" "))
-		assertEquals(TokenType.Boolean, getNextToken("true"))
-		assertEquals(TokenType.Boolean, getNextToken("false"))
-		assertEquals(TokenType.AdditiveOperator, getNextToken("-"))
-		assertEquals(TokenType.Assign, getNextToken("="))
-		assertEquals(TokenType.Comma, getNextToken(","))
-		assertEquals(TokenType.RB, getNextToken(")"))
-		assertEquals(TokenType.LB, getNextToken("("))
-		assertEquals(TokenType.Negate, getNextToken("!"))
-		assertEquals(TokenType.Comparison, getNextToken("<="))
-		assertEquals(TokenType.LogicalOr, getNextToken("||"))
-		assertEquals(TokenType.LogicalAnd, getNextToken("&&"))
+		assertEquals(Boolean, getNextToken("true"))
+		assertEquals(Boolean, getNextToken("false"))
+		assertEquals(AdditiveOperator, getNextToken("-"))
+		assertEquals(Assign, getNextToken("="))
+		assertEquals(Comma, getNextToken(","))
+		assertEquals(RB, getNextToken(")"))
+		assertEquals(LB, getNextToken("("))
+		assertEquals(Negate, getNextToken("!"))
+		assertEquals(Comparison, getNextToken("<="))
+		assertEquals(LogicalOr, getNextToken("||"))
+		assertEquals(LogicalAnd, getNextToken("&&"))
 		assertEquals(Number, getNextToken("123"))
-		assertEquals(TokenType.AdditiveOperator, getNextToken("-123"))
+		assertEquals(AdditiveOperator, getNextToken("-123"))
 		assertEquals(TokenType.String, getNextToken("\"hello\""))
-		assertEquals(TokenType.Identifier, getNextToken("a1"))
-		assertEquals(TokenType.Identifier, getNextToken("_a1"))
-		assertEquals(TokenType.MultiplicativeOperator, getNextToken("*"))
-		assertEquals(TokenType.MultiplicativeOperator, getNextToken("/"))
-		assertEquals(TokenType.Potency, getNextToken("^"))
+		assertEquals(Identifier, getNextToken("a1"))
+		assertEquals(Identifier, getNextToken("_a1"))
+		assertEquals(MultiplicativeOperator, getNextToken("*"))
+		assertEquals(MultiplicativeOperator, getNextToken("/"))
+		assertEquals(Potency, getNextToken("^"))
 		
 	}
 	
-	fun getNextToken(str: String): TokenType? {
+	private fun getNextToken(str: String): TokenType? {
 		val (token, _) = Tokenizer.getNextToken(str, 0) ?: (null to 0)
 		return token?.type
 	}
 	
-	fun tokenize(str: String): List<TokenType> {
+	private fun tokenize(str: String): List<TokenType> {
 		return Tokenizer.tokenize(str).map { it.type }
 	}
 }

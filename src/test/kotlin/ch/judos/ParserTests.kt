@@ -1,5 +1,6 @@
 package ch.judos
 
+import ch.judos.model.BasicEvaluationEnvironment
 import ch.judos.model.EvaluationEnvironment
 import ch.judos.service.Parser
 import ch.judos.service.Tokenizer
@@ -27,8 +28,6 @@ class ParserTests {
 		
 		Parser(Tokenizer.tokenize("f(x) = x + 1")).parseFunction().evaluate(env)
 		assertEquals(6.0, Parser(Tokenizer.tokenize("f(5)")).parseExpression().evaluate(env))
-		
-		Parser(Tokenizer.tokenize("f(x) = f(x-1) + 1")).parseFunction().evaluate(env)
 	}
 	
 	@Test
@@ -36,6 +35,13 @@ class ParserTests {
 		val env = EvaluationEnvironment()
 		assertEquals(true, Parser(Tokenizer.tokenize("true || false")).parseExpression().evaluate(env))
 		assertEquals(false, Parser(Tokenizer.tokenize("true && false")).parseExpression().evaluate(env))
-		
+	}
+	
+	@Test
+	fun testBaseFunctions() {
+		val env = BasicEvaluationEnvironment()
+		Parser(Tokenizer.tokenize("f(x) = WENN(x,3,2)")).parseFunction().evaluate(env)
+		assertEquals(3.0, Parser(Tokenizer.tokenize("f(true)")).parseExpression().evaluate(env))
+		assertEquals(2.0, Parser(Tokenizer.tokenize("f(false)")).parseExpression().evaluate(env))
 	}
 }

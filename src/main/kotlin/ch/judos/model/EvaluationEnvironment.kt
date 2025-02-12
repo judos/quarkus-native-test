@@ -1,6 +1,6 @@
 package ch.judos.model
 
-class EvaluationEnvironment(
+open class EvaluationEnvironment(
 	val parent: EvaluationEnvironment? = null
 ) {
 	
@@ -13,7 +13,7 @@ class EvaluationEnvironment(
 			?: throw Exception("Variable $name not found")
 	}
 	
-	fun evaluateFunction(name: String, arguments: List<Any>): Any {
+	open fun evaluateFunction(name: String, arguments: List<Any>): Any {
 		val function = functions[name]
 			?: parent?.evaluateFunction(name, arguments)?.let { return it }
 			?: throw Exception("Function $name not found")
