@@ -6,18 +6,31 @@ import kotlin.math.pow
 class FunctionDefinition(
 		var name: String,
 		var parameters: List<String>,
-	// var body: Expression
-)
+		var body: Expression
+) {
+	fun evaluate(env: EvaluationEnvironment) {
+		env.functions[name] = this
+	}
+}
+
+class Assignment(
+		val variable: String,
+		val expression: Expression
+) {
+	fun evaluate(env: EvaluationEnvironment) {
+		env.variables[variable] = expression.evaluate(env) as Double
+	}
+}
 
 
-class BinaryExpression(
+class BinaryNumberExpression(
 		val left: Expression,
 		val operator: String,
 		val right: Expression
 ) : Expression() {
 	override fun getType(): ExpressionType {
 		if (left.getType() != ExpressionType.Double || right.getType() != ExpressionType.Double) {
-			throw Exception("PotencyExpression requires both sides to be Double")
+			throw Exception("NumberExpression requires both sides to be Double")
 		}
 		return ExpressionType.Double
 	}
@@ -77,7 +90,7 @@ class VariableLiteral(
 
 class StringLiteral(
 		value: String,
-) : Expression(){
+) : Expression() {
 	val value = value.substring(1, value.length - 1)
 	override fun getType(): ExpressionType {
 		return ExpressionType.String
@@ -90,7 +103,7 @@ class StringLiteral(
 
 class BooleanLiteral(
 		value: String,
-) : Expression()  {
+) : Expression() {
 	val value = value.toBoolean()
 	override fun getType(): ExpressionType {
 		return ExpressionType.Boolean

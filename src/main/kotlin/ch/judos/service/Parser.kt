@@ -12,6 +12,43 @@ class Parser(
 		get() = tokens.getOrNull(tokenCursor + 1)
 	private var tokenCursor = 0
 	
+	/** FunctionDefinition
+	 * : <Identifier>(<Parameters>) = <Expression>
+	 */
+	fun functionDefinition(): FunctionDefinition {
+		val name = eat(TokenType.Identifier)
+		eat(TokenType.LB)
+		val parameters = parameters()
+		eat(TokenType.RB)
+		eat(TokenType.Assign)
+		val body = expression()
+		return FunctionDefinition(name, parameters, body)
+	}
+	
+	/** Parameters
+	 * : <Identifier> (, <Identifier>)*
+	 */
+	fun parameters(): List<String> {
+		val parameters = mutableListOf<String>()
+		parameters.add(eat(TokenType.Identifier))
+		while (lookahead?.type == TokenType.Comma) {
+			eat(TokenType.Comma)
+			parameters.add(eat(TokenType.Identifier))
+		}
+		return parameters
+	}
+	
+	/** Assignment
+	 * : <Variable> = <Expression>
+	 */
+	fun assignment(): Assignment {
+		val variable = eat(TokenType.Identifier)
+		eat(TokenType.Assign)
+		val expression = expression()
+		return Assignment(variable, expression)
+	}
+	
+	
 	fun expression(): Expression {
 		return additiveExpression()
 	}
@@ -24,7 +61,7 @@ class Parser(
 		while (lookahead?.type == TokenType.AdditiveOperator) {
 			val operator = eat(TokenType.AdditiveOperator)
 			val right = expression()
-			left = BinaryExpression(left, operator, right)
+			left = BinaryNumberExpression(left, operator, right)
 		}
 		return left
 	}
@@ -38,7 +75,7 @@ class Parser(
 		while (lookahead?.type == TokenType.MultiplicativeOperator) {
 			val operator = eat(TokenType.MultiplicativeOperator)
 			val right = expression()
-			left = BinaryExpression(left, operator, right)
+			left = BinaryNumberExpression(left, operator, right)
 		}
 		return left
 	}
@@ -51,13 +88,13 @@ class Parser(
 		while (lookahead?.type == TokenType.Potency) {
 			val op = eat(TokenType.Potency)
 			val right = expression()
-			left = BinaryExpression(left, op, right)
+			left = BinaryNumberExpression(left, op, right)
 		}
 		return left
 	}
 	
 	/** PrimaryExpression
-	 * : <String> | <Number> | <Boolean> | <Variable>(<Arguments>) | <Variable> | ( <Expression> )
+	 * : <String> | <Number> | <Boolean> | <Function>(<Arguments>) | <Variable> | ( <Expression> )
 	 */
 	fun primaryExpression(): Expression {
 		if (lookahead?.type == TokenType.String) {
