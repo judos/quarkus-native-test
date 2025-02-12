@@ -9,22 +9,14 @@ class FunctionDefinition(
 		var body: Expression
 ): Expression() {
 	override fun evaluate(env: EvaluationEnvironment): FunctionDefinition {
-		// TODO: where to put this
-		// env.functions[name] = this
 		return this
 	}
-	
-	
 }
 
 class Assignment(
 		val variable: String,
 		val expression: Expression
-) {
-	fun evaluate(env: EvaluationEnvironment) {
-		env.variables[variable] = expression.evaluate(env) as Double
-	}
-}
+)
 
 class UnaryBooleanExpression(
 		val operator: String,

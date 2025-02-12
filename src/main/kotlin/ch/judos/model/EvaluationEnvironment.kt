@@ -28,4 +28,8 @@ open class EvaluationEnvironment(
 		functions[function.name] = function
 	}
 	
+	fun runAssignment(assignment: Assignment) {
+		variables[assignment.variable] = assignment.expression.evaluate(this)
+	}
+	
 }

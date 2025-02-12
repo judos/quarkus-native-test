@@ -22,7 +22,7 @@ class ParserTests {
 		env.variables["x"] = 5.0
 		assertEquals(10.0, Parser(Tokenizer.tokenize("2 * x")).parseExpression().evaluate(env))
 		
-		Parser(Tokenizer.tokenize("x = 1")).parseAssignment().evaluate(env)
+		env.runAssignment(Parser(Tokenizer.tokenize("x = 1")).parseAssignment())
 		assertEquals(2.0, Parser(Tokenizer.tokenize("2 * x")).parseExpression().evaluate(env))
 		
 		
