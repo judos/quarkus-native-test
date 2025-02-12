@@ -1,7 +1,8 @@
 package ch.judos
 
 import ch.judos.model.TokenType
-import ch.judos.model.TokenType.AdditiveOperator
+import ch.judos.model.TokenType.*
+import ch.judos.model.TokenType.Boolean
 import ch.judos.model.TokenType.Number
 import ch.judos.service.Tokenizer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,7 +12,8 @@ class TokenizerTests {
 	
 	@Test
 	fun testTokenize() {
-		assertEquals(listOf(Number, AdditiveOperator, Number), Tokenizer.tokenize("1 +  2"))
+		assertEquals(listOf(Boolean, LogicalOr, Boolean), tokenize("true || false"))
+		assertEquals(listOf(Number, AdditiveOperator, Number), tokenize("1 +  2"))
 	}
 	
 	@Test
@@ -41,11 +43,12 @@ class TokenizerTests {
 		assertEquals(TokenType.AdditiveOperator, getNextToken("-"))
 		assertEquals(TokenType.Assign, getNextToken("="))
 		assertEquals(TokenType.Comma, getNextToken(","))
-		assertEquals(TokenType.RB, getNextToken("("))
-		assertEquals(TokenType.LB, getNextToken(")"))
+		assertEquals(TokenType.RB, getNextToken(")"))
+		assertEquals(TokenType.LB, getNextToken("("))
 		assertEquals(TokenType.Negate, getNextToken("!"))
 		assertEquals(TokenType.Comparison, getNextToken("<="))
-		assertEquals(TokenType.LogicalOperator, getNextToken("||"))
+		assertEquals(TokenType.LogicalOr, getNextToken("||"))
+		assertEquals(TokenType.LogicalAnd, getNextToken("&&"))
 		assertEquals(Number, getNextToken("123"))
 		assertEquals(TokenType.AdditiveOperator, getNextToken("-123"))
 		assertEquals(TokenType.String, getNextToken("\"hello\""))
@@ -53,11 +56,16 @@ class TokenizerTests {
 		assertEquals(TokenType.Identifier, getNextToken("_a1"))
 		assertEquals(TokenType.MultiplicativeOperator, getNextToken("*"))
 		assertEquals(TokenType.MultiplicativeOperator, getNextToken("/"))
+		assertEquals(TokenType.Potency, getNextToken("^"))
 		
 	}
 	
 	fun getNextToken(str: String): TokenType? {
 		val (token, _) = Tokenizer.getNextToken(str, 0) ?: (null to 0)
 		return token?.type
+	}
+	
+	fun tokenize(str: String): List<TokenType> {
+		return Tokenizer.tokenize(str).map { it.type }
 	}
 }

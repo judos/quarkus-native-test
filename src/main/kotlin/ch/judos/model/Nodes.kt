@@ -22,6 +22,74 @@ class Assignment(
 	}
 }
 
+class UnaryBooleanExpression(
+		val operator: String,
+		val expression: Expression
+) : Expression() {
+	override fun getType(): ExpressionType {
+		if (expression.getType() != ExpressionType.Boolean) {
+			throw Exception("BooleanExpression requires value to be Boolean")
+		}
+		return ExpressionType.Boolean
+	}
+	
+	override fun evaluate(env: EvaluationEnvironment): Any {
+		if (operator == "!") {
+			return !(expression.evaluate(env) as Boolean)
+		}
+		throw Exception("Unknown operator $operator")
+	}
+}
+
+class BinaryBooleanExpression(
+		val left: Expression,
+		val operator: String,
+		val right: Expression
+) : Expression() {
+	override fun getType(): ExpressionType {
+		if (left.getType() != ExpressionType.Boolean || right.getType() != ExpressionType.Boolean) {
+			throw Exception("BooleanExpression requires both sides to be Boolean")
+		}
+		return ExpressionType.Boolean
+	}
+	
+	override fun evaluate(env: EvaluationEnvironment): Any {
+		if (operator == "||") {
+			return (left.evaluate(env) as Boolean) || (right.evaluate(env) as Boolean)
+		}
+		if (operator == "&&") {
+			return (left.evaluate(env) as Boolean) && (right.evaluate(env) as Boolean)
+		}
+		throw Exception("Unknown operator $operator")
+	}
+}
+
+class BinaryBooleanComparisonExpression(
+		val left: Expression,
+		val operator: String,
+		val right: Expression
+) : Expression() {
+	override fun getType(): ExpressionType {
+		if (left.getType() != ExpressionType.Double || right.getType() != ExpressionType.Double) {
+			throw Exception("ComparisonExpression requires both sides to be Double")
+		}
+		return ExpressionType.Boolean
+	}
+	
+	override fun evaluate(env: EvaluationEnvironment): Any {
+		val l = left.evaluate(env) as Double
+		val r = right.evaluate(env) as Double
+		return when (operator) {
+			"==" -> l == r
+			"!=" -> l != r
+			">=" -> l >= r
+			"<=" -> l <= r
+			">" -> l > r
+			"<" -> l < r
+			else -> throw Exception("Unknown operator $operator")
+		}
+	}
+}
 
 class BinaryNumberExpression(
 		val left: Expression,
@@ -36,25 +104,17 @@ class BinaryNumberExpression(
 	}
 	
 	override fun evaluate(env: EvaluationEnvironment): Any {
-		if (operator == "+") {
-			return (left.evaluate(env) as Double) + (right.evaluate(env) as Double)
+		val l = left.evaluate(env) as Double
+		val r = right.evaluate(env) as Double
+		return when (operator) {
+			"+" -> l + r
+			"-" -> l - r
+			"*" -> l * r
+			"/" -> l / r
+			"%" -> l % r
+			"^" -> l.pow(r)
+			else -> throw Exception("Unknown operator $operator")
 		}
-		if (operator == "-") {
-			return (left.evaluate(env) as Double) - (right.evaluate(env) as Double)
-		}
-		if (operator == "*") {
-			return (left.evaluate(env) as Double) * (right.evaluate(env) as Double)
-		}
-		if (operator == "/") {
-			return (left.evaluate(env) as Double) / (right.evaluate(env) as Double)
-		}
-		if (operator == "%") {
-			return (left.evaluate(env) as Double) % (right.evaluate(env) as Double)
-		}
-		if (operator == "^") {
-			return (left.evaluate(env) as Double).pow((right.evaluate(env) as Double))
-		}
-		throw Exception("Unknown operator $operator")
 	}
 }
 

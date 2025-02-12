@@ -20,7 +20,7 @@ object Tokenizer {
 		var cursor = cursor_
 		wh@ while (cursor < str.length){
 			for ((pattern, type) in TokenPatterns) {
-				val match = "^$pattern".toRegex().find(str.substring(cursor))
+				val match = "^($pattern)".toRegex().find(str.substring(cursor))
 				if (match != null && type != null) {
 					val token = Token(type, match.value)
 					return Pair(token, cursor + match.range.last + 1)

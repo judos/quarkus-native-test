@@ -15,13 +15,16 @@ class Parser(
 	/** FunctionDefinition
 	 * : <Identifier>(<Parameters>) = <Expression>
 	 */
-	fun functionDefinition(): FunctionDefinition {
+	fun parseFunction(): FunctionDefinition {
 		val name = eat(TokenType.Identifier)
 		eat(TokenType.LB)
 		val parameters = parameters()
 		eat(TokenType.RB)
 		eat(TokenType.Assign)
 		val body = expression()
+		if (tokenCursor < tokens.size) {
+			throw Exception("Unexpected tokens after function definition")
+		}
 		return FunctionDefinition(name, parameters, body)
 	}
 	
@@ -41,16 +44,65 @@ class Parser(
 	/** Assignment
 	 * : <Variable> = <Expression>
 	 */
-	fun assignment(): Assignment {
+	fun parseAssignment(): Assignment {
 		val variable = eat(TokenType.Identifier)
 		eat(TokenType.Assign)
 		val expression = expression()
+		if (tokenCursor < tokens.size) {
+			throw Exception("Unexpected tokens after function definition")
+		}
 		return Assignment(variable, expression)
 	}
 	
+	fun parseExpression(): Expression {
+		val expression = disjunction()
+		if (tokenCursor < tokens.size) {
+			throw Exception("Unexpected tokens after expression ${lookahead!!.type}(\"${lookahead!!.value}\")")
+		}
+		return expression
+	}
 	
-	fun expression(): Expression {
-		return additiveExpression()
+	private fun expression(): Expression {
+		return disjunction()
+	}
+	
+	/** Disjunction
+	 * : <Conjunction> (|| <Disjunction>)*
+	 */
+	fun disjunction(): Expression {
+		var left = conjunction()
+		while (lookahead?.type == TokenType.LogicalOr) {
+			val operator = eat(TokenType.LogicalOr)
+			val right = disjunction()
+			left = BinaryBooleanExpression(left, operator, right)
+		}
+		return left
+	}
+	
+	/** Conjunction
+	 * : <Comparison> (&& <Conjunction>)*
+	 */
+	fun conjunction(): Expression {
+		var left = comparison()
+		while (lookahead?.type == TokenType.LogicalAnd) {
+			val operator = eat(TokenType.LogicalAnd)
+			val right = conjunction()
+			left = BinaryBooleanExpression(left, operator, right)
+		}
+		return left
+	}
+	
+	/** Comparison
+	 * : <AdditiveExpression> (< > <= >= == != <AdditiveExpression>)?
+	 */
+	fun comparison(): Expression {
+		var left = additiveExpression()
+		if (lookahead?.type == TokenType.Comparison) {
+			val operator = eat(TokenType.Comparison)
+			val right = additiveExpression()
+			left = BinaryBooleanComparisonExpression(left, operator, right)
+		}
+		return left
 	}
 	
 	/** AdditiveExpression
@@ -81,7 +133,7 @@ class Parser(
 	}
 	
 	/** PotencyExpression
-	 * : <PrimaryExpression> (^ <Expression>)*
+	 * : <PrefixExpression> (^ <Expression>)*
 	 */
 	fun potencyExpression(): Expression {
 		var left = primaryExpression()
@@ -91,6 +143,18 @@ class Parser(
 			left = BinaryNumberExpression(left, op, right)
 		}
 		return left
+	}
+	
+	/** PrefixExpression
+	 * : <Negate>? <PrimaryExpression>
+	 */
+	fun prefixExpression(): Expression {
+		if (lookahead?.type == TokenType.Negate) {
+			val op = eat(TokenType.Negate)
+			val right = primaryExpression()
+			return UnaryBooleanExpression(op, right)
+		}
+		return primaryExpression()
 	}
 	
 	/** PrimaryExpression

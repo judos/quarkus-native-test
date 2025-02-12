@@ -13,7 +13,8 @@ enum class TokenType {
 	RB, // right bracket
 	LB, // left bracket
 	Comparison,      // ==, !=, >=, <=, >, <
-	LogicalOperator, // &&, ||
+	LogicalOr, // ||
+	LogicalAnd, // &&
 	Negate, // !
 	Identifier, // asdf
 }
