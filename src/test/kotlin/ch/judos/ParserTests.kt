@@ -2,6 +2,7 @@ package ch.judos
 
 import ch.judos.model.BasicEvaluationEnvironment
 import ch.judos.model.EvaluationEnvironment
+import ch.judos.model.FunctionDefinition
 import ch.judos.service.Parser
 import ch.judos.service.Tokenizer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +49,7 @@ class ParserTests {
 	@Test
 	fun testLambdas() {
 		val env = BasicEvaluationEnvironment()
-		// assertEquals(Unit, Parser(Tokenizer.tokenize("f() = { x -> x + 1 }")).parseFunction().evaluate(env))
+		assertEquals(FunctionDefinition::class, Parser(Tokenizer.tokenize("f() = { x -> x + 1 }")).parseFunction().evaluate(env)::class)
 		assertEquals(1.0, Parser(Tokenizer.tokenize("linint(0.5, { x -> 2*x })")).parseExpression().evaluate(env))
 		assertEquals(2.5, Parser(Tokenizer.tokenize("linint(1.5, { x -> x^2 })")).parseExpression().evaluate(env))
 		assertEquals(45.0, Parser(Tokenizer.tokenize("sum(0, 9, { x -> x })")).parseExpression().evaluate(env))
