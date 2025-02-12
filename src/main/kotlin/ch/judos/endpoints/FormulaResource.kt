@@ -1,6 +1,8 @@
 package ch.judos.endpoints
 
 import ch.judos.model.Formula
+import ch.judos.service.Parser
+import ch.judos.service.Tokenizer
 import jakarta.annotation.security.PermitAll
 import jakarta.inject.Inject
 import jakarta.persistence.EntityManager
@@ -20,6 +22,9 @@ class FormulaResource {
 	@Path("")
 	@Transactional
 	fun create(formula: Formula): Long {
+		// Parse to validate first
+		val def = Parser(Tokenizer.tokenize(formula.formula)).parseFunction()
+		formula.name = def.name
 		em.persist(formula)
 		return formula.id
 	}

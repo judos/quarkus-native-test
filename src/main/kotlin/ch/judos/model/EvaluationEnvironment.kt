@@ -1,5 +1,7 @@
 package ch.judos.model
 
+import jakarta.ws.rs.NotFoundException
+
 open class EvaluationEnvironment(
 	val parent: EvaluationEnvironment? = null
 ) {
@@ -10,18 +12,22 @@ open class EvaluationEnvironment(
 	fun evaluateVar(name: String): Any {
 		return variables[name]
 			?: parent?.evaluateVar(name)
-			?: throw Exception("Variable $name not found")
+			?: throw NotFoundException("Variable $name not found")
 	}
 	
 	open fun evaluateFunction(name: String, arguments: List<Any>): Any {
 		val function = functions[name]
 			?: parent?.evaluateFunction(name, arguments)?.let { return it }
-			?: throw Exception("Function $name not found")
+			?: throw NotFoundException("Function $name not found")
+		return evaluateFunction(function, arguments)
+	}
+	
+	protected fun evaluateFunction(func: FunctionDefinition, arguments: List<Any>): Any {
 		val env = EvaluationEnvironment(this)
-		for (i in function.parameters.indices) {
-			env.variables[function.parameters[i]] = arguments[i]
+		for (i in func.parameters.indices) {
+			env.variables[func.parameters[i]] = arguments[i]
 		}
-		return function.body.evaluate(env)
+		return func.body.evaluate(env)
 	}
 	
 	fun saveFunction(function: FunctionDefinition) {

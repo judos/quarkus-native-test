@@ -1,8 +1,9 @@
 package ch.judos.model
 
+import java.security.InvalidParameterException
 import kotlin.math.floor
 
-class BasicEvaluationEnvironment : EvaluationEnvironment() {
+open class BasicEvaluationEnvironment : EvaluationEnvironment() {
 	
 	override fun evaluateFunction(name: String, arguments: List<Any>): Any {
 		return when (name.lowercase()) {
@@ -19,8 +20,8 @@ class BasicEvaluationEnvironment : EvaluationEnvironment() {
 		val end = arguments[1] as Double
 		val lamda = arguments[2] as FunctionDefinition
 		if (lamda.parameters.size != 1) {
-			throw Exception(
-				"Function $name expected lambda with 1 argument, got ${lamda.parameters.size}")
+			throw InvalidParameterException("Function $name expected lambda with 1 argument, " +
+					"got ${lamda.parameters.size}")
 		}
 		val env = EvaluationEnvironment(this)
 		var sum = 0.0
@@ -41,8 +42,8 @@ class BasicEvaluationEnvironment : EvaluationEnvironment() {
 		val x = arguments[0] as Double
 		val lamda = arguments[1] as FunctionDefinition
 		if (lamda.parameters.size != 1) {
-			throw Exception(
-				"Function $name expected lambda with 1 argument, got ${lamda.parameters.size}")
+			throw InvalidParameterException("Function $name expected lambda with 1 argument, " +
+					"got ${lamda.parameters.size}")
 		}
 		val env = EvaluationEnvironment(this)
 		val x0 = floor(x)
@@ -56,12 +57,12 @@ class BasicEvaluationEnvironment : EvaluationEnvironment() {
 	
 	fun checkArgs(name: String, args: List<Any>, vararg expected: ExpressionType) {
 		if (args.size != expected.size) {
-			throw Exception("Function $name expected ${expected.size} arguments, got ${args.size}")
+			throw InvalidParameterException("Function $name expected ${expected.size} arguments, got ${args.size}")
 		}
 		for (i in expected.indices) {
 			if (!expected[i].isMatch(args[i])) {
-				throw Exception(
-					"Function $name expected argument $i to be of type ${expected[i]}, got ${args[i]}")
+				throw InvalidParameterException("Function $name expected argument $i to be of type " +
+						"${expected[i]}, got ${args[i]}")
 			}
 		}
 	}
