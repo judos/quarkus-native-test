@@ -7,10 +7,14 @@ class FunctionDefinition(
 		var name: String,
 		var parameters: List<String>,
 		var body: Expression
-) {
-	fun evaluate(env: EvaluationEnvironment) {
-		env.functions[name] = this
+): Expression() {
+	override fun evaluate(env: EvaluationEnvironment): FunctionDefinition {
+		// TODO: where to put this
+		// env.functions[name] = this
+		return this
 	}
+	
+	
 }
 
 class Assignment(
@@ -26,18 +30,16 @@ class UnaryBooleanExpression(
 		val operator: String,
 		val expression: Expression
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		if (expression.getType() != ExpressionType.Boolean) {
-			throw Exception("BooleanExpression requires value to be Boolean")
-		}
-		return ExpressionType.Boolean
-	}
 	
 	override fun evaluate(env: EvaluationEnvironment): Any {
-		if (operator == "!") {
-			return !(expression.evaluate(env) as Boolean)
+		val e = expression.evaluate(env)
+		if (e !is Boolean) {
+			throw Exception("BooleanExpression requires value to be Boolean")
 		}
-		throw Exception("Unknown operator $operator")
+		return when (operator) {
+			"!" -> !e
+			else -> throw Exception("Unknown operator $operator")
+		}
 	}
 }
 
@@ -46,39 +48,32 @@ class BinaryBooleanExpression(
 		val operator: String,
 		val right: Expression
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		if (left.getType() != ExpressionType.Boolean || right.getType() != ExpressionType.Boolean) {
-			throw Exception("BooleanExpression requires both sides to be Boolean")
-		}
-		return ExpressionType.Boolean
-	}
 	
 	override fun evaluate(env: EvaluationEnvironment): Any {
-		if (operator == "||") {
-			return (left.evaluate(env) as Boolean) || (right.evaluate(env) as Boolean)
+		val l = left.evaluate(env)
+		val r = right.evaluate(env)
+		if (l !is Boolean || r !is Boolean) {
+			throw Exception("BooleanExpression requires both sides to be Boolean")
 		}
-		if (operator == "&&") {
-			return (left.evaluate(env) as Boolean) && (right.evaluate(env) as Boolean)
+		return when(operator) {
+			"||" -> l || r
+			"&&" -> l && r
+			else -> throw Exception("Unknown operator $operator")
 		}
-		throw Exception("Unknown operator $operator")
 	}
 }
 
-class BinaryBooleanComparisonExpression(
+class NumberComparisonExpression(
 		val left: Expression,
 		val operator: String,
 		val right: Expression
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		if (left.getType() != ExpressionType.Double || right.getType() != ExpressionType.Double) {
-			throw Exception("ComparisonExpression requires both sides to be Double")
-		}
-		return ExpressionType.Boolean
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
-		val l = left.evaluate(env) as Double
-		val r = right.evaluate(env) as Double
+		val l = left.evaluate(env)
+		val r = right.evaluate(env)
+		if (l !is Double || r !is Double) {
+			throw Exception("NumberComparison requires both sides to be Double")
+		}
 		return when (operator) {
 			"==" -> l == r
 			"!=" -> l != r
@@ -96,16 +91,12 @@ class BinaryNumberExpression(
 		val operator: String,
 		val right: Expression
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		if (left.getType() != ExpressionType.Double || right.getType() != ExpressionType.Double) {
+	override fun evaluate(env: EvaluationEnvironment): Any {
+		val l = left.evaluate(env)
+		val r = right.evaluate(env)
+		if (l !is Double || r !is Double) {
 			throw Exception("NumberExpression requires both sides to be Double")
 		}
-		return ExpressionType.Double
-	}
-	
-	override fun evaluate(env: EvaluationEnvironment): Any {
-		val l = left.evaluate(env) as Double
-		val r = right.evaluate(env) as Double
 		return when (operator) {
 			"+" -> l + r
 			"-" -> l - r
@@ -122,11 +113,6 @@ class FunctionCall(
 		val name: String,
 		val arguments: List<Expression>
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		// TODO: implement
-		return ExpressionType.Double
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
 		val args = arguments.map { it.evaluate(env) }
 		return env.evaluateFunction(name, args)
@@ -137,11 +123,6 @@ class FunctionCall(
 class VariableLiteral(
 		val name: String
 ) : Expression() {
-	override fun getType(): ExpressionType {
-		// TODO: implement
-		return ExpressionType.Double
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
 		return env.evaluateVar(name)
 	}
@@ -152,10 +133,6 @@ class StringLiteral(
 		value: String,
 ) : Expression() {
 	val value = value.substring(1, value.length - 1)
-	override fun getType(): ExpressionType {
-		return ExpressionType.String
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
 		return value
 	}
@@ -165,10 +142,6 @@ class BooleanLiteral(
 		value: String,
 ) : Expression() {
 	val value = value.toBoolean()
-	override fun getType(): ExpressionType {
-		return ExpressionType.Boolean
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
 		return value
 	}
@@ -178,10 +151,6 @@ class NumberLiteral(
 		value: String,
 ) : Expression() {
 	val value = value.toDouble()
-	override fun getType(): ExpressionType {
-		return ExpressionType.Double
-	}
-	
 	override fun evaluate(env: EvaluationEnvironment): Any {
 		return value
 	}
@@ -189,6 +158,5 @@ class NumberLiteral(
 
 abstract class Expression(
 ) {
-	abstract fun getType(): ExpressionType
 	abstract fun evaluate(env: EvaluationEnvironment): Any
 }

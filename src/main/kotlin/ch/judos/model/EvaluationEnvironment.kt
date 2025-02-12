@@ -24,4 +24,8 @@ open class EvaluationEnvironment(
 		return function.body.evaluate(env)
 	}
 	
+	fun saveFunction(function: FunctionDefinition) {
+		functions[function.name] = function
+	}
+	
 }

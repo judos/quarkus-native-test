@@ -26,7 +26,7 @@ class ParserTests {
 		assertEquals(2.0, Parser(Tokenizer.tokenize("2 * x")).parseExpression().evaluate(env))
 		
 		
-		Parser(Tokenizer.tokenize("f(x) = x + 1")).parseFunction().evaluate(env)
+		env.saveFunction(Parser(Tokenizer.tokenize("f(x) = x + 1")).parseFunction())
 		assertEquals(6.0, Parser(Tokenizer.tokenize("f(5)")).parseExpression().evaluate(env))
 	}
 	
@@ -40,8 +40,16 @@ class ParserTests {
 	@Test
 	fun testBaseFunctions() {
 		val env = BasicEvaluationEnvironment()
-		Parser(Tokenizer.tokenize("f(x) = WENN(x,3,2)")).parseFunction().evaluate(env)
+		env.saveFunction(Parser(Tokenizer.tokenize("f(x) = WENN(x,3,2)")).parseFunction())
 		assertEquals(3.0, Parser(Tokenizer.tokenize("f(true)")).parseExpression().evaluate(env))
 		assertEquals(2.0, Parser(Tokenizer.tokenize("f(false)")).parseExpression().evaluate(env))
+	}
+	
+	@Test
+	fun testLambdas() {
+		val env = BasicEvaluationEnvironment()
+		// assertEquals(Unit, Parser(Tokenizer.tokenize("f() = { x -> x + 1 }")).parseFunction().evaluate(env))
+		assertEquals(1.0, Parser(Tokenizer.tokenize("linint(0.5, { x -> 2*x })")).parseExpression().evaluate(env))
+		assertEquals(2.5, Parser(Tokenizer.tokenize("linint(1.5, { x -> x^2 })")).parseExpression().evaluate(env))
 	}
 }

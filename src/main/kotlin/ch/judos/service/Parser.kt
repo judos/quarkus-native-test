@@ -23,17 +23,19 @@ class Parser(
 		eat(TokenType.Assign)
 		val body = expression()
 		if (tokenCursor < tokens.size) {
-			throw Exception("Unexpected tokens after function definition")
+			throw Exception("Unexpected tokens after function definition ${lookahead!!.type}(\"${lookahead!!.value}\")")
 		}
 		return FunctionDefinition(name, parameters, body)
 	}
 	
 	/** Parameters
-	 * : <Identifier> (, <Identifier>)*
+	 * : <Identifier>? (, <Identifier>)*
 	 */
 	fun parameters(): List<String> {
 		val parameters = mutableListOf<String>()
-		parameters.add(eat(TokenType.Identifier))
+		if (lookahead?.type == TokenType.Identifier)
+			parameters.add(eat(TokenType.Identifier))
+		else return parameters
 		while (lookahead?.type == TokenType.Comma) {
 			eat(TokenType.Comma)
 			parameters.add(eat(TokenType.Identifier))
@@ -49,7 +51,7 @@ class Parser(
 		eat(TokenType.Assign)
 		val expression = expression()
 		if (tokenCursor < tokens.size) {
-			throw Exception("Unexpected tokens after function definition")
+			throw Exception("Unexpected tokens after assignment ${lookahead!!.type}(\"${lookahead!!.value}\")")
 		}
 		return Assignment(variable, expression)
 	}
@@ -100,7 +102,7 @@ class Parser(
 		if (lookahead?.type == TokenType.Comparison) {
 			val operator = eat(TokenType.Comparison)
 			val right = additiveExpression()
-			left = BinaryBooleanComparisonExpression(left, operator, right)
+			left = NumberComparisonExpression(left, operator, right)
 		}
 		return left
 	}
@@ -158,7 +160,9 @@ class Parser(
 	}
 	
 	/** PrimaryExpression
-	 * : <String> | <Number> | <Boolean> | <Function>(<Arguments>) | <Variable> | ( <Expression> )
+	 * : <String> | <Number> | <Boolean> | <Function>'('<Arguments>')' | <Variable> |
+	 * '(' <Expression> ')' |
+	 * '{' <Parameter> (',' <Parameter>)* -> <Expression> '}'
 	 */
 	fun primaryExpression(): Expression {
 		if (lookahead?.type == TokenType.String) {
@@ -186,6 +190,14 @@ class Parser(
 			val expression = expression()
 			eat(TokenType.RB)
 			return expression
+		}
+		if (lookahead?.type == TokenType.LC) {
+			eat(TokenType.LC)
+			val parameters = parameters()
+			eat(TokenType.Arrow)
+			val expression = expression()
+			eat(TokenType.RC)
+			return FunctionDefinition("lambda", parameters, expression)
 		}
 		throw Exception("Unexpected type $lookahead")
 	}

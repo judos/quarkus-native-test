@@ -50,6 +50,7 @@ class TokenizerTests {
 		assertEquals(LogicalOr, getNextToken("||"))
 		assertEquals(LogicalAnd, getNextToken("&&"))
 		assertEquals(Number, getNextToken("123"))
+		assertEquals(Number, getNextToken("1.0"))
 		assertEquals(AdditiveOperator, getNextToken("-123"))
 		assertEquals(TokenType.String, getNextToken("\"hello\""))
 		assertEquals(Identifier, getNextToken("a1"))
