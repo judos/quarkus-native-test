@@ -51,5 +51,18 @@ class ParserTests {
 		// assertEquals(Unit, Parser(Tokenizer.tokenize("f() = { x -> x + 1 }")).parseFunction().evaluate(env))
 		assertEquals(1.0, Parser(Tokenizer.tokenize("linint(0.5, { x -> 2*x })")).parseExpression().evaluate(env))
 		assertEquals(2.5, Parser(Tokenizer.tokenize("linint(1.5, { x -> x^2 })")).parseExpression().evaluate(env))
+		assertEquals(45.0, Parser(Tokenizer.tokenize("sum(0, 9, { x -> x })")).parseExpression().evaluate(env))
+	}
+	
+	@Test
+	fun testRoundingErrors() {
+		val env = BasicEvaluationEnvironment()
+		assertEquals(2.0, Parser(Tokenizer.tokenize("sum(1+1 / 10 * 10, 2, { x -> x })")).parseExpression().evaluate(env))
+	}
+	
+	@Test
+	fun testOperatorOrder() {
+		val env = BasicEvaluationEnvironment()
+		assertEquals(10.0, Parser(Tokenizer.tokenize("10 / 10 * 10")).parseExpression().evaluate(env))
 	}
 }

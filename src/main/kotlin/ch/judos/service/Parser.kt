@@ -69,26 +69,26 @@ class Parser(
 	}
 	
 	/** Disjunction
-	 * : <Conjunction> (|| <Disjunction>)*
+	 * : <Conjunction> (|| <Conjunction>)*
 	 */
 	fun disjunction(): Expression {
 		var left = conjunction()
 		while (lookahead?.type == TokenType.LogicalOr) {
 			val operator = eat(TokenType.LogicalOr)
-			val right = disjunction()
+			val right = conjunction()
 			left = BinaryBooleanExpression(left, operator, right)
 		}
 		return left
 	}
 	
 	/** Conjunction
-	 * : <Comparison> (&& <Conjunction>)*
+	 * : <Comparison> (&& <Comparison>)*
 	 */
 	fun conjunction(): Expression {
 		var left = comparison()
 		while (lookahead?.type == TokenType.LogicalAnd) {
 			val operator = eat(TokenType.LogicalAnd)
-			val right = conjunction()
+			val right = comparison()
 			left = BinaryBooleanExpression(left, operator, right)
 		}
 		return left
@@ -108,13 +108,13 @@ class Parser(
 	}
 	
 	/** AdditiveExpression
-	 * : <MultiplicativeExpression> (+ - <Expression>)*
+	 * : <MultiplicativeExpression> (+ - <MultiplicativeExpression>)*
 	 */
 	fun additiveExpression(): Expression {
 		var left = multiplicativeExpression()
 		while (lookahead?.type == TokenType.AdditiveOperator) {
 			val operator = eat(TokenType.AdditiveOperator)
-			val right = expression()
+			val right = multiplicativeExpression()
 			left = BinaryNumberExpression(left, operator, right)
 		}
 		return left
@@ -122,26 +122,26 @@ class Parser(
 	
 	
 	/** MultiplicativeExpression
-	 * : <PotencyExpression> (* / <Expression>)*
+	 * : <PotencyExpression> (* / <PotencyExpression>)*
 	 */
 	fun multiplicativeExpression(): Expression {
 		var left = potencyExpression()
 		while (lookahead?.type == TokenType.MultiplicativeOperator) {
 			val operator = eat(TokenType.MultiplicativeOperator)
-			val right = expression()
+			val right = potencyExpression()
 			left = BinaryNumberExpression(left, operator, right)
 		}
 		return left
 	}
 	
 	/** PotencyExpression
-	 * : <PrefixExpression> (^ <Expression>)*
+	 * : <PrefixExpression> (^ <PrefixExpression>)*
 	 */
 	fun potencyExpression(): Expression {
-		var left = primaryExpression()
+		var left = prefixExpression()
 		while (lookahead?.type == TokenType.Potency) {
 			val op = eat(TokenType.Potency)
-			val right = expression()
+			val right = prefixExpression()
 			left = BinaryNumberExpression(left, op, right)
 		}
 		return left
