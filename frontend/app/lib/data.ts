@@ -1,14 +1,6 @@
-import postgres from 'postgres';
-import {
-  CustomerField,
-  CustomersTableType,
-  InvoiceForm,
-  InvoicesTable,
-  LatestInvoiceRaw,
-  Revenue,
-} from './definitions';
+import { LatestInvoice, LatestInvoiceRaw, Revenue } from './definitions';
 import { formatCurrency } from './utils';
-import mysql, { QueryResult, RowDataPacket } from 'mysql2/promise';
+import mysql, { RowDataPacket } from 'mysql2/promise';
 
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST,
@@ -33,7 +25,7 @@ export async function fetchRevenue(): Promise<Revenue[]> {
 }
 
 // Fetch Latest Invoices
-export async function fetchLatestInvoices() {
+export async function fetchLatestInvoices(): Promise<LatestInvoice[]> {
   try {
     const [data] = await pool.query(`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -43,11 +35,10 @@ export async function fetchLatestInvoices() {
       LIMIT 5
     `);
 
-    const latestInvoices = data.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
-    }));
-    return latestInvoices;
+		return (data as RowDataPacket[]).map((invoice: any) => ({
+			...invoice,
+			amount: formatCurrency(invoice.amount),
+		}));
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch the latest invoices.');
@@ -57,21 +48,18 @@ export async function fetchLatestInvoices() {
 // Fetch Card Data
 export async function fetchCardData() {
   try {
-    const invoiceCountPromise = pool.query('SELECT COUNT(*) AS count FROM invoices');
-    const customerCountPromise = pool.query('SELECT COUNT(*) AS count FROM customers');
-    const invoiceStatusPromise = pool.query(`
-      SELECT 
-        SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS paid,
-        SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS pending
-      FROM invoices
-    `);
-
+    const invoiceCountPromise = pool.query<RowDataPacket[]>('SELECT COUNT(*) AS count FROM invoices');
+    const customerCountPromise = pool.query<RowDataPacket[]>('SELECT COUNT(*) AS count FROM customers');
+    const invoiceStatusPromise = pool.query<RowDataPacket[]>(`
+        SELECT SUM(IF(status = 'paid', amount, 0))    AS paid,
+               SUM(IF(status = 'pending', amount, 0)) AS pending
+        FROM invoices
+		`);
     const [invoiceCount, customerCount, invoiceStatus] = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
       invoiceStatusPromise,
     ]);
-
     return {
       numberOfInvoices: Number(invoiceCount[0][0].count ?? '0'),
       numberOfCustomers: Number(customerCount[0][0].count ?? '0'),
@@ -85,6 +73,7 @@ export async function fetchCardData() {
 }
 
 // Fetch Filtered Invoices
+const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(query, currentPage) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
